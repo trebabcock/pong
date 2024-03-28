@@ -36,6 +36,8 @@ var (
 const (
 	WIDTH  float64 = 1366
 	HEIGHT float64 = 768
+
+	SPEED_MULTIPLIER = 0.1
 )
 
 type Paddle struct {
@@ -108,9 +110,13 @@ func (b *Ball) Move(player, opponent Paddle) {
 	} else if b.WillCollideWithPlayer(player) {
 		b.MoveDirection.FlipX()
 		b.MoveDirection.Add(Vector2{0, b.CollisionPoint(player)})
+		b.Speed *= b.CollisionPoint(player)
+		// writeToStdout(b.CollisionPoint(player))
 	} else if b.WillCollideWithOpponent(opponent) {
 		b.MoveDirection.FlipX()
 		b.MoveDirection.Add(Vector2{0, b.CollisionPoint(opponent)})
+		b.Speed *= b.CollisionPoint(opponent)
+		// writeToStdout(b.CollisionPoint(opponent))
 	} else if b.WillCollideWithPlayerWall() {
 		Point(false, &player, &opponent, b)
 	} else if b.WillCollideWithOpponentWall() {
@@ -119,6 +125,12 @@ func (b *Ball) Move(player, opponent Paddle) {
 	b.Position.Add(ScalarProduct(b.MoveDirection, b.Speed))
 	b.Shape = MakeRectangle(b.Position, b.Color, 25, 25)
 }
+
+// func writeToStdout(value any) {
+// 	text := fmt.Sprintf("%v", value)
+// 	w := bufio.NewWriter(os.Stdout)
+// 	w.Write([]byte(text))
+// }
 
 func (b *Ball) WillCollideWithPlayer(player Paddle) bool {
 	target := VectorSum(b.Position, ScalarProduct(b.MoveDirection, b.Speed))
